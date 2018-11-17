@@ -37,8 +37,8 @@ def binary_classification(obj):
               ('content', TEXT),
               ('trump_percentage', LABEL),]
     
-    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
-    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
+    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_trump_percentage.csv'
+    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_trump_percentage.csv'
     
     train_dataset = TabularDataset(path=obj.data_path+'/'+train_csv,
                                    format='csv',
@@ -85,10 +85,12 @@ if __name__== "__main__":
 
     fields = [('id', None),
               ('content', TEXT),
+              ('Trump', None),
+              ('Clinton', None),
               ('trump_percentage', LABEL),]
 
-    train_csv = 'twitter_pollster_7_days_train.csv'
-    test_csv = 'twitter_pollster_7_days_test.csv'
+    train_csv = 'twitter_pollster_7_days_train_trump_percentage.csv'
+    test_csv = 'twitter_pollster_7_days_test_trump_percentage.csv'
 
     train_dataset = TabularDataset(path='mydata/'+train_csv,
                                    format='csv',
@@ -109,7 +111,7 @@ if __name__== "__main__":
     train_iter, test_iter = Iterator.splits(
             (train_dataset, test_dataset),
             sort_key=lambda x: len(x.content), 
-            batch_sizes=(2, 2),
+            batch_sizes=(7, 7),
             device=torch.device('cuda:0'),
             sort_within_batch=True,
             repeat=False)
@@ -117,9 +119,13 @@ if __name__== "__main__":
     train_iter_ = BatchWrapper(train_iter, 'content', ['trump_percentage'])
     test_iter_ = BatchWrapper(test_iter, 'content', ['trump_percentage'])
 
+    print(print(next(iter(train_iter_))))
+          
     for iter, batch in enumerate(train_iter_, 1):
         if iter==1:
             print(iter, batch)
             print("batch[0]: ", batch[0])
             print("batch[1]: ", batch[1])
+            print("batch[0] size: ", batch[0].shape)
+            print("batch[1] size: ", batch[1].shape)
         break

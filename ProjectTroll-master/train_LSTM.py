@@ -11,7 +11,8 @@ net_list        = [
                    ]
 
 lr_list         = [
-                   5e-3,
+                   1e-3
+                   #5e-3,
                    #1e-4,
                    #5e-4,
                    ]
@@ -25,7 +26,7 @@ for net_idx in range(len(net_list)):
     for lr_idx in range(len(lr_list)):
         for wd_idx in range(len(wd_list)):
 
-            loader_opts  = {'loader'                    : 'basic', # 'binary_classification' for binary classification
+            loader_opts  = {'loader'                    : 'binary_classification', # 'binary_classification' for binary classification
                             'data_path'                 : os.path.join(troll_root, 'mydata'),
                             'days'                      : 7,
                             'Glove_name'                : 'twitter.27B',
@@ -35,10 +36,11 @@ for net_idx in range(len(net_list)):
 
             net_opts     = {'hidden_size'               : 256,
                             'attention_size'            : 256,
-                            'output_size'               : 2, #1 for binary classification
+                            'output_size'               : 1, #1 for binary classification
+                            'last_sigmoid'              : True, #True for binary classification
                             }
 
-            train_opts   = {'crit'                      : 'MSELoss', #'BCEWithLogitsLoss' for binary classification
+            train_opts   = {'crit'                      : 'BCELoss', #'MSELoss', #'BCELoss' for binary classification
                             'net'                       : net_list[net_idx],
                             'optim'                     : 'Adam',
                             'weight_decay'              : wd_list[wd_idx],

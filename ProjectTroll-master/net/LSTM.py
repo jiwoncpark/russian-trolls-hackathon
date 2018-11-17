@@ -15,7 +15,10 @@ class LSTM(nn.Module):
         
         self.lstm = nn.LSTM(obj.embedding_dim, obj.hidden_size)
         
-        self.label = nn.Linear(obj.hidden_size, obj.output_size)
+        self.fc_1 = nn.Linear(obj.hidden_size, obj.hidden_size)
+        self.fc_final = nn.Linear(obj.hidden_size, obj.output_size)
+        
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, input):
 
@@ -32,5 +35,10 @@ class LSTM(nn.Module):
 
         output, (final_hidden_state, final_cell_state) = self.lstm(input, (h_0, c_0))
         
-        return self.label(final_hidden_state[-1])
+        if self.obj.last_sigmoid:
+            after_fc_1 = self.fc_1(final_hidden_state[-1])
+            after_fc_final = self.fc_final(after_fc_1)
+            return self.sigmoid(after_fc_final)
+        else:
+            return self.label(final_hidden_state[-1])
 
