@@ -7,8 +7,7 @@ troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
 sys.path.insert(0, troll_root)
 
 net_list        = [
-                   #'LSTM',
-                   'AttentionLSTM',
+                   'LSTM',
                    ]
 
 lr_list         = [
@@ -35,7 +34,6 @@ for net_idx in range(len(net_list)):
                             }
 
             net_opts     = {'hidden_size'               : 256,
-                            'output_size'               : 2,
                             'attention_size'            : 256,
                             }
 
