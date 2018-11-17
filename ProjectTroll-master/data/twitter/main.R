@@ -16,5 +16,7 @@ troll_tweets <- troll_tweets %>% dplyr::filter(language == "English")
 out <- troll_tweets %>% dplyr::select(content, publish_date)
 
 # write to csv
-write.csv(out, file="/home/jwp/stage/stats285-experiment-management-system/hackathon/ProjectTroll-master/mydata/twitter.csv",  row.names=FALSE)
+write.csv(out, file="mydata/twitter.csv",  row.names=FALSE)
 
+# absolute path not necessary
+#/home/jwp/stage/stats285-experiment-management-system/russian-trolls-hackathon/ProjectTroll-master/

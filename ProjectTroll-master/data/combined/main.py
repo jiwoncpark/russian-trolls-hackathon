@@ -2,14 +2,16 @@ import numpy as np
 import pandas as pd
 
 from datetime import datetime, timedelta
+import sys, os
+troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
+sys.path.insert(0, troll_root)
 
 days = 7
 
 # load both datasets
 print('loading data')
-troll_root = '/home/jwp/stage/stats285-experiment-management-system/hackathon/ProjectTroll-master'
-twitter = pd.read_csv(troll_root + '/mydata/twitter.csv')
-pollster = pd.read_csv(troll_root + '/mydata/pollster.csv')
+twitter = pd.read_csv(os.path.join(troll_root, 'mydata', 'twitter.csv'))
+pollster = pd.read_csv(os.path.join(troll_root, 'mydata', 'pollster.csv'))
 
 # format dates
 print('formating dates')
@@ -68,6 +70,6 @@ train = pollster.iloc[:idx]
 test = pollster.iloc[idx:]
 
 # save to csv
-train.to_csv(troll_root + '/mydata/twitter_pollster_'+str(days)+'_days_train.csv')
-test.to_csv(troll_root + '/mydata/twitter_pollster_'+str(days)+'_days_test.csv')
+train.to_csv(os.path.join(troll_root, 'mydata', 'twitter_pollster_' + str(days) + '_days_train.csv'))
+test.to_csv(os.path.join(troll_root, 'mydata', 'twitter_pollster_' + str(days) + '_days_test.csv'))
 
