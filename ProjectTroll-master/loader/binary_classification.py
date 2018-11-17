@@ -35,8 +35,7 @@ def binary_classification(obj):
     
     fields = [('id', None),
               ('content', TEXT),
-              ('Trump', LABEL),
-              ('Clinton', LABEL)]
+              ('trump_percentage', LABEL),]
     
     train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
     test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
