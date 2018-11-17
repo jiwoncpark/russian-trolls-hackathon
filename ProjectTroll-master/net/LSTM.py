@@ -30,8 +30,7 @@ class LSTM(nn.Module):
         h_0 = h_0.to(self.obj.device)
         c_0 = c_0.to(self.obj.device)
 
-        output, (final_hidden_state, final_cell_state) \
-        = self.lstm(input, (h_0, c_0))
+        output, (final_hidden_state, final_cell_state) = self.lstm(input, (h_0, c_0))
         
         return self.label(final_hidden_state[-1])
 
