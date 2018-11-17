@@ -7,18 +7,18 @@ troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
 sys.path.insert(0, troll_root)
 
 net_list        = [
-                   'LSTM',
+                   #'LSTM',
                    'AttentionLSTM',
                    ]
 
 lr_list         = [
                    5e-3,
-                   1e-4,
-                   5e-4,
+                   #1e-4,
+                   #5e-4,
                    ]
 
 wd_list         = [
-                   1e-4,
+                   #1e-4,
                    5e-4,
                    ]
 
@@ -29,8 +29,8 @@ for net_idx in range(len(net_list)):
             loader_opts  = {'loader'                    : 'basic',
                             'data_path'                 : os.path.join(troll_root, 'mydata'),
                             'days'                      : 7,
-                            'Glove_name'                : '27B',
-                            'embedding_dim'             : 200,
+                            'Glove_name'                : '6B',
+                            'embedding_dim'             : 300,
                             'fix_length'                : None,
                             }
 
@@ -44,7 +44,7 @@ for net_idx in range(len(net_list)):
                             'optim'                     : 'Adam',
                             'weight_decay'              : wd_list[wd_idx],
                             'optim_kwargs'              : {},
-                            'epochs'                    : 1,
+                            'epochs'                    : 100,
                             'lr'                        : lr_list[lr_idx],
                             'milestones_perc'           : [1/3,2/3],
                             'gamma'                     : 0.1,
