@@ -28,8 +28,7 @@ class Experiment:
         self.set_seed()
         
         # create loaders
-        self.TEXT, self.vocab_size, self.word_embeddings, \
-        self.train_loader, self.test_loader = get_loader(self)
+        self.TEXT, self.vocab_size, self.word_embeddings, self.train_loader, self.test_loader = get_loader(self)
         
         # initialize network
         self.model = get_net(self)
