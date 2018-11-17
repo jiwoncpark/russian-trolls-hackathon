@@ -1,0 +1,35 @@
+# Data
+*.csv
+*.txt
+*.zip
+*.pkl
+*.json
+
+# Temp
+*~
+*#
+
+# Byte-compiled/optimized/DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Migrated from ProjectTroll-master
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Checkpoints and cache
+*.pyc
+*.pth
+*.pt
+ProjectTroll-master/.vector_cache
+
+# Jupyter notebook
+*practice_notebook.ipynb
+*.ipynb_checkpoints
