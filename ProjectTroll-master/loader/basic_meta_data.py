@@ -19,7 +19,7 @@ class BatchWrapper:
     def __len__(self):
         return len(self.dl)
     
-def basic(obj):
+def basic_meta_data(obj):
     tokenize = lambda x: x.split()
     TEXT = Field(sequential=True,
                  tokenize=tokenize,
@@ -49,8 +49,8 @@ def basic(obj):
              ('mid', LABEL),
              ('right', LABEL),]
     
-    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
-    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
+    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_small.csv'
+    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_small.csv'
     
     train_dataset = TabularDataset(path=obj.data_path+'/'+train_csv,
                                    format='csv',
