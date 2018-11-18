@@ -37,7 +37,7 @@ for net_idx in range(len(net_list)):
 
             net_opts     = {'hidden_size'               : 256,
                             'attention_size'            : 256,
-                            'meta_dim'                  : 6, # not configurable...
+                            'meta_dim'                  : 9, # not configurable...
                             'meta_hidden_size'          : 16, # something less than 256 but comparable
                             'output_size'               : 3, #1 for binary classification
                             'total_hidden_size'         : 8,

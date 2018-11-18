@@ -138,12 +138,23 @@ class Experiment:
                 est = self.model(input_text=input_text, input_meta=input_meta)
 
                 loss = 0.0
+                three_losses = []
+                three_baseline_losses = []
                 for output_idx in range(3):
                     flavor_est = est[:, output_idx]
                     flavor_target = target[:, output_idx]
                     flavor_loss = self.criterion(flavor_est, flavor_target)
+                    three_losses.append(flavor_loss)
                     loss += flavor_loss/3.0
+                    # Baseline loss
+                    baseline_flavor_est = input_meta[:, output_idx + 5]
+                    baseline_flavor_loss = self.criterion(baseline_flavor_est, flavor_target)
+                    three_baseline_losses.append(baseline_flavor_loss)
                 
+                ratios = []
+                for output_idx in range(3):
+                    ratio.append(three_baseline_losses[output_idx]/baseline_losses[output_idx])
+                    
                 # backward pass
                 if phase == 'train':
                     self.optimizer.zero_grad()
@@ -225,7 +236,7 @@ class Experiment:
                          'iter_batch_time'   : batch_time.val,
                          'avg_batch_time'    : batch_time.avg,
                          'iter_data_time'    : data_time.val,
-                         'avg_data_time'     : data_time.avg}
+                         'avg_data_time'     : data_time.avg,}
                 
                 # meters that will be saved into the csv
                 for name, meter in meters.items():
