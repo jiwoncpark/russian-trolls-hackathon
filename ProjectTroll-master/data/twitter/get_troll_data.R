@@ -13,7 +13,7 @@ get_troll_data <- function(..., data_dir = NULL){
   
   troll_list <- list()
   cat("starting download ...\n\n")
-  for(i in 1:13){
+  for(i in 1:5){
     
     file_name <- paste0("troll_tweets", i, ".csv")
     link <- paste0("https://raw.githubusercontent.com/fivethirtyeight/russian-troll-tweets/master/IRAhandle_tweets_",

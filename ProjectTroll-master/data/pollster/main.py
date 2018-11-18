@@ -22,8 +22,9 @@ print('GET /question/:slug/poll_responses_clean.tsv... (for %s)' % question_slug
 
 responses_clean = api.questions_slug_poll_responses_clean_tsv_get(question_slug)
 
+
 # remove all columns except trump, clinton and the starting date of the poll
-responses_clean = responses_clean[['start_date','Trump','Clinton']]
+#responses_clean = responses_clean[['start_date','Trump','Clinton']]
 
 responses_clean.to_csv(os.path.join(troll_root, 'mydata', 'pollster.csv'))
 

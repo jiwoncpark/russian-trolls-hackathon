@@ -36,8 +36,12 @@ for net_idx in range(len(net_list)):
 
             net_opts     = {'hidden_size'               : 256,
                             'attention_size'            : 256,
+<<<<<<< Updated upstream
                             'output_size'               : 1, #1 for binary classification
                             'last_sigmoid'              : True, #True for binary classification
+=======
+                            'output_size'               : 2,
+>>>>>>> Stashed changes
                             }
 
             train_opts   = {'crit'                      : 'BCELoss', #'MSELoss', #'BCELoss' for binary classification

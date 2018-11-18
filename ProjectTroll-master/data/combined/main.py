@@ -8,25 +8,18 @@ troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
 sys.path.insert(0, troll_root)
 
 days = 7
+election_date = pd.to_datetime('2016-11-08')
 
 # load both datasets
 print('loading data')
 twitter = pd.read_csv(os.path.join(troll_root, 'mydata', 'twitter.csv'))
-pollster = pd.read_csv(os.path.join(troll_root, 'mydata', 'pollster.csv'))
+pollster = pd.read_csv(os.path.join(troll_root, 'mydata', 'pollster_left_mid_right.csv'))
 
 # format dates
 print('formating dates')
 twitter['publish_date'] = pd.to_datetime(twitter['publish_date'])
 pollster['start_date'] = pd.to_datetime(pollster['start_date'])
-# for i in range(len(twitter)):
-#     twitter.loc[i,'publish_date'] = datetime.strptime(
-#             twitter.loc[i,'publish_date'],
-#             '%m/%d/%Y %H:%M')
 
-# for j in range(len(pollster)):
-#     pollster.loc[j,'start_date'] = datetime.strptime(
-#             pollster.loc[j,'start_date'],
-#             '%Y-%m-%d')
 
 pollster.sort_values(by=['start_date'], inplace=True)
 
@@ -39,20 +32,20 @@ for i in range(len(twitter)):
 
     poll_idxs = pollster.loc[(twitter_publish < pollster['start_date']) &\
     (pollster['start_date'] < twitter_publish + timedelta(days=days))].index.values
-
-    # poll_idxs = []
-    # for j in range(len(pollster)):
-    #     pollster_start = pollster.loc[j,'start_date']
-    #     if (twitter_publish < pollster_start) \
-    #      & (twitter_publish > pollster_start - timedelta(days=days)):
-    #          poll_idxs.append(j)
              
     # assign tweet randomly to one of the polls
     if len(poll_idxs) > 0:
         twitter.loc[i,'poll_idx'] = np.random.choice(poll_idxs)
     else:
         twitter.loc[i,'poll_idx'] = None
-print(time.time()-start_time)  
+
+twitter = twitter.loc[twitter['poll_idx'] != None]
+
+# twitter = twitter.join(pollster,on='poll_idx')
+# twitter.sort_values(by=['poll_idx'], inplace=True)
+# twitter.to_csv(os.path.join(troll_root, 'mydata', 'twitter_pollster.csv'))
+
+ 
 # aggregate the tweets of each poll
 print('aggregating tweets belonging to the same poll')
 polls_with_tweets = []
@@ -62,14 +55,32 @@ for j in range(len(pollster)):
     
     if len(tweets) > 0:
         polls_with_tweets.append(j)
-        
         pollster.loc[j,'content'] = ' '.join(tweets['content'].values)
+        pollster.loc[j,'avg_followers'] = np.mean(tweets['followers'].values)
+        pollster.loc[j,'avg_following'] = np.mean(tweets['following'].values)
+        pollster.loc[j,'avg_right'] = np.mean(tweets['account_category'] == 'RightTroll')
+        pollster.loc[j,'avg_left'] = np.mean(tweets['account_category'] == 'LeftTroll')
+        pollster.loc[j,'avg_news'] = np.mean(tweets['account_category'] == 'NewsFeed')
+        pollster.loc[j,'time'] = (election_date - pollster.loc[j,'start_date'])
+
+pollster['avg_followers'] = pollster['avg_followers'].astype(np.float32)
+pollster['avg_following'] = pollster['avg_following'].astype(np.float32)
+pollster['avg_right'] = pollster['avg_right'].astype(np.float32)
+pollster['avg_left'] = pollster['avg_left'].astype(np.float32)
+pollster['avg_news'] = pollster['avg_news'].astype(np.float32)
+#pollster['time'] = pollster['time'].astype(np.float32)
+pollster['left'] = pollster['left'].astype(np.float32)
+pollster['mid'] = pollster['mid'].astype(np.float32)
+pollster['right'] = pollster['right'].astype(np.float32)
+
+
         
 # remove polls with no tweets
 pollster = pollster.loc[polls_with_tweets]
 
 # remove unnecessary columns
-pollster = pollster[['content','Trump','Clinton']]
+pollster = pollster[['content','avg_followers','avg_following',\
+            'avg_right','avg_left','avg_news','time','left','mid','right']]
 
 # split to train and test polls
 idx = int(0.8*len(pollster))
