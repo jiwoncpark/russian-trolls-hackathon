@@ -45,7 +45,9 @@ def basic_meta_data(obj):
               ('avg_left', VARIABLE),
               ('avg_news', VARIABLE),
               ('time', VARIABLE),
-              ('baseline_pred', VARIABLE),
+              ('baseline_pred_left', VARIABLE),
+              ('baseline_pred_mid', VARIABLE),
+              ('baseline_pred_right', VARIABLE),
               ('left', LABEL),
              ('mid', LABEL),
              ('right', LABEL),]
@@ -77,8 +79,8 @@ def basic_meta_data(obj):
             sort_within_batch=True,
             repeat=False)
     
-    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred'], ['left', 'mid', 'right'])
-    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred'], ['left', 'mid', 'right'])
+    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
     
     return TEXT, vocab_size, word_embeddings, train_iter_, test_iter_
 
