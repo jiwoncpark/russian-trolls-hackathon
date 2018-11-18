@@ -7,7 +7,7 @@ troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
 sys.path.insert(0, troll_root)
 
 net_list        = [
-                   'GRU',
+                   'LSTM',
                    ]
 
 lr_list         = [

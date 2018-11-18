@@ -50,8 +50,10 @@ def basic_meta_data(obj):
              ('mid', LABEL),
              ('right', LABEL),]
     
-    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_small.csv'
-    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_small.csv'
+    #train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
+    train_csv = 'train1.csv'
+    #test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
+    test_csv = 'test1.csv'
     
     train_dataset = TabularDataset(path=obj.data_path+'/'+train_csv,
                                    format='csv',
