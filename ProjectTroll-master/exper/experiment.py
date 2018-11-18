@@ -34,6 +34,8 @@ class Experiment:
         self.model = get_net(self)
         self.model.to(self.device)
         
+        # Metadata input + 3-tuple output
+        
         # criterion to optimize
         func = getattr(nn, self.crit)
         self.criterion = func()
@@ -121,42 +123,75 @@ class Experiment:
             data_time.update(time.time() - t)
     
             # batch input and target output
-            input   = batch[0]
-            target  = batch[1]
-            
-            # transfer data to gpu
-            input = input.to(self.device)
-            target = target.to(self.device)
-            
-            torch.set_grad_enabled(phase == 'train')
-            
-            # forward pass
-            est = self.model(input)
-            
-            #print("est")
-            #print()
-            #print(est)
-            #print()
-            #print("target")
-            #print(target)
-            
-            # Threshold the labels with 0.5
-            #target = (target > 0.5).float()
-            
-            # compute loss
-            loss = self.criterion(est, target)
-            
-            # backward pass
-            if phase == 'train':
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+            if self.loader == 'basic_meta_data':
+                input_text = batch[0] # tweets
+                input_meta = batch[1] # metadata
+                target = batch[2]
                 
-            # update meters (top1, top5, loss, etc.)
-            for name, func in stats_meter.items():
-                meters[name].update(func(locals()), input.data.shape[0])
+                # transfer data to gpu
+                input_text = input_text.to(self.device)
+                input_meta = input_meta.to(self.device)
+                target = target.to(self.device)
                 
-            batch_time.update(time.time() - t)
+                torch.set_grad_enabled(phase == 'train')
+                
+                est = self.model(input_text=input_text, input_meta=input_meta)
+
+                loss = 0.0
+                for output_idx in range(3):
+                    flavor_est = est[:, output_idx]
+                    flavor_target = target[:, output_idx]
+                    flavor_loss = self.criterion(flavor_est, flavor_target)
+                    loss += flavor_loss/3.0
+                
+                # backward pass
+                if phase == 'train':
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+
+                # update meters (top1, top5, loss, etc.)
+                for name, func in stats_meter.items():
+                    meters[name].update(func(locals()), input_text.data.shape[0])
+
+                batch_time.update(time.time() - t)
+            else:
+                input   = batch[0] # tweets
+                target  = batch[1] # label
+                
+                # transfer data to gpu
+                input = input.to(self.device)
+                target = target.to(self.device)
+                
+                torch.set_grad_enabled(phase == 'train')
+            
+                # forward pass
+                est = self.model(input)
+            
+                #print("est")
+                #print()
+                #print(est)
+                #print()
+                #print("target")
+                #print(target)
+
+                # Threshold the labels with 0.5
+                #target = (target > 0.5).float()
+
+                # compute loss
+                loss = self.criterion(est, target)
+            
+                # backward pass
+                if phase == 'train':
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+
+                # update meters (top1, top5, loss, etc.)
+                for name, func in stats_meter.items():
+                    meters[name].update(func(locals()), input.data.shape[0])
+
+                batch_time.update(time.time() - t)
             
             # print to console progress
             output = '{}\t'                                                 \
