@@ -10,8 +10,8 @@ class LSTM(nn.Module):
         
         self.word_embeddings = nn.Embedding(obj.vocab_size,
                                             obj.embedding_dim)
-        
-        self.word_embeddings.weight.requires_grad = False
+        self.word_embeddings.weight = nn.Parameter(obj.word_embeddings, requires_grad=False)
+        #self.word_embeddings.weight.requires_grad = False
         
         self.lstm = nn.LSTM(obj.embedding_dim, obj.hidden_size)
         
