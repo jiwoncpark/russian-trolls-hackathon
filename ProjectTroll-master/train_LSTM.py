@@ -7,7 +7,7 @@ troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
 sys.path.insert(0, troll_root)
 
 net_list        = [
-                   'LSTM',
+                   'GRU',
                    ]
 
 lr_list         = [
@@ -26,7 +26,8 @@ for net_idx in range(len(net_list)):
     for lr_idx in range(len(lr_list)):
         for wd_idx in range(len(wd_list)):
 
-            loader_opts  = {'loader'                    : 'binary_classification', # 'binary_classification' for binary classification
+            loader_opts  = {'loader'                    : 'basic_meta_data', # 'binary_classification' for binary classification
+                                                                                   # 'basic_meta_data' for taking in metadata and outputting 3-tuple
                             'data_path'                 : os.path.join(troll_root, 'mydata'),
                             'days'                      : 7,
                             'Glove_name'                : 'twitter.27B',
@@ -36,12 +37,12 @@ for net_idx in range(len(net_list)):
 
             net_opts     = {'hidden_size'               : 256,
                             'attention_size'            : 256,
-<<<<<<< Updated upstream
-                            'output_size'               : 1, #1 for binary classification
+                            'meta_dim'                  : 6, # not configurable...
+                            'meta_hidden_size'          : 16, # something less than 256 but comparable
+                            'output_size'               : 3, #1 for binary classification
+                            'total_hidden_size'         : 8,
                             'last_sigmoid'              : True, #True for binary classification
-=======
-                            'output_size'               : 2,
->>>>>>> Stashed changes
+                            'output_size'               : 3,
                             }
 
             train_opts   = {'crit'                      : 'BCELoss', #'MSELoss', #'BCELoss' for binary classification
