@@ -2,19 +2,32 @@
 
 from utils.device import get_device
 from exper.experiment import Experiment
-import sys, os
-troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
-sys.path.insert(0, troll_root)
+import sys, os, csv
+# troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
+# sys.path.insert(0, troll_root)
 
+# This block of code directs the path of mydata folder to prevent downloading multiple times
+# MAKE SURE YOU ALSO UPDATE THE PATH IN LOADER FILE !!!!
+if 'Users' in os.getcwd():
+    # Specify your local mydata folder
+    path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+else:
+    # Specify your cloud mydata folder
+    path = '/scratch/users/yzhang16/Shannon/data/mydata'
+
+# Prepare training log files that show best result.
+csv_file = open('best_model_log.csv', mode='w')
+fieldnames = ['net_list', 'lr_list', 'wd_list', 'best_test_loss']
+writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+writer.writeheader()
+
+# Specify hyperparatemers
 net_list        = [
                    'GRU',
                    ]
 
 lr_list         = [
                    1e-3
-                   #5e-3,
-                   #1e-4,
-                   #5e-4,
                    ]
 
 wd_list         = [
@@ -28,7 +41,7 @@ for net_idx in range(len(net_list)):
 
             loader_opts  = {'loader'                    : 'basic_meta_data', # 'binary_classification' for binary classification
                                                                                    # 'basic_meta_data' for taking in metadata and outputting 3-tuple
-                            'data_path'                 : os.path.join(troll_root, 'mydata'),
+                            'data_path'                 : path,
                             'days'                      : 7,
                             'Glove_name'                : 'twitter.27B',
                             'embedding_dim'             : 200,
@@ -75,5 +88,6 @@ for net_idx in range(len(net_list)):
             # these meters will be displayed to the console but not saved into a csv
             stats_no_meter = {}
 
-            Experiment(opts).run(stats_meter, stats_no_meter)
-
+            best_test_accuracy = Experiment(opts).run(stats_meter, stats_no_meter)
+            writer.writerow({'net_list': net_list[net_idx], 'lr_list': lr_list[lr_idx], 
+                'wd_list': wd_list[wd_idx], 'best_test_accuracy': best_test_accuracy})

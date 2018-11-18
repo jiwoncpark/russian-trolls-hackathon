@@ -1,7 +1,14 @@
 import torch
-
+import os, sys
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset, Iterator, Pipeline
+
+# This block of code directs the path of mydata folder to prevent downloading
+# multiple times
+if 'Users' in os.getcwd():
+    path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+else:
+    path = '/scratch/users/yzhang16/Shannon/GloVe/'
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
@@ -49,8 +56,8 @@ def basic_meta_data(obj):
              ('mid', LABEL),
              ('right', LABEL),]
     
-    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_small.csv'
-    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_small.csv'
+    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
+    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
     
     train_dataset = TabularDataset(path=obj.data_path+'/'+train_csv,
                                    format='csv',

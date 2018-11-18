@@ -5,7 +5,7 @@ import random
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data.distributed
-
+import numpy as np
 from os import makedirs
 from os.path import exists
 from utils.dump import Dump
@@ -59,6 +59,10 @@ class Experiment:
         
         self.set_seed()
         
+        # Keep track of the best model achieved for one set of hyperparameters
+        best_model = None
+        best_test_accuracy = np.infty 
+        
         for epoch in range(1, self.epochs + 1):
             
             self.lr_scheduler.step()
@@ -86,9 +90,17 @@ class Experiment:
             results.save()
             results.to_csv()
             
-            # save model
-            save_check_point(self, self.model)
+            # save model only if a better model is found, otherwise print a blank line
+            if (best_test_accuracy > epoch_test_accuracy):
+                best_test_accuracy = epoch_test_accuracy
+                print("Better model is found!")
+                sys.stdout.flush()
+                save_check_point(self, self.model)
+            else:
+                print()
             
+        print("Best loss for this hyperparameter is {}".format(best_test_accuracy))
+        return best_test_accuracy
             
     def run_epoch(self,
                   phase,
@@ -278,5 +290,3 @@ class Experiment:
                 del state[attr]
         
         return state
-        
-        

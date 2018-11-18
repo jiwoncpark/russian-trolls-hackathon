@@ -1,8 +1,15 @@
 <<<<<<< Updated upstream
 import torch
-
+import os, sys
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset, Iterator, Pipeline
+
+# This block of code directs the path of mydata folder to prevent downloading
+# multiple times
+if 'Users' in os.getcwd():
+    path = '~/Documents/00_CourseWork/STATS285/ProjectTroll-master/.vector_cache/'
+else:
+    path = '/scratch/users/yzhang16/Shannon/GloVe/'
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
