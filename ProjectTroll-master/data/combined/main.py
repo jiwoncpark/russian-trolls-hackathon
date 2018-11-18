@@ -15,15 +15,17 @@ pollster = pd.read_csv(os.path.join(troll_root, 'mydata', 'pollster.csv'))
 
 # format dates
 print('formating dates')
-for i in range(len(twitter)):
-    twitter.loc[i,'publish_date'] = datetime.strptime(
-            twitter.loc[i,'publish_date'],
-            '%m/%d/%Y %H:%M')
+twitter['publish_date'] = pd.to_datetime(twitter['publish_date'])
+pollster['start_date'] = pd.to_datetime(pollster['start_date'])
+# for i in range(len(twitter)):
+#     twitter.loc[i,'publish_date'] = datetime.strptime(
+#             twitter.loc[i,'publish_date'],
+#             '%m/%d/%Y %H:%M')
 
-for j in range(len(pollster)):
-    pollster.loc[j,'start_date'] = datetime.strptime(
-            pollster.loc[j,'start_date'],
-            '%Y-%m-%d')
+# for j in range(len(pollster)):
+#     pollster.loc[j,'start_date'] = datetime.strptime(
+#             pollster.loc[j,'start_date'],
+#             '%Y-%m-%d')
 
 # assign tweets uniquely to polls
 print('assigning tweets to polls')
