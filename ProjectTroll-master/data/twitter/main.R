@@ -1,5 +1,5 @@
-source("data/twitter/get_troll_data.R")
-source("data/twitter/txt_helper_functions.R")
+source("get_troll_data.R")
+source("txt_helper_functions.R")
 library(dplyr)
 library(tm) # Text Mining, https://www.rdocumentation.org/packages/tm/versions/0.7-5
 
@@ -13,7 +13,7 @@ troll_tweets <- get_troll_data(data_dir = "mydata", nrows=2000)
 troll_tweets <- troll_tweets %>% dplyr::filter(language == "English")
 
 # keep only the content and the publish date
-out <- troll_tweets %>% dplyr::select(content, publish_date)
+out <- troll_tweets %>% dplyr::select(content, publish_date, followers, following, account_category)
 
 # write to csv
 write.csv(out, file="mydata/twitter.csv",  row.names=FALSE)
