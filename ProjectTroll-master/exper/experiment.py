@@ -28,8 +28,7 @@ class Experiment:
         self.set_seed()
         
         # create loaders
-        self.TEXT, self.vocab_size, self.word_embeddings, \
-        self.train_loader, self.test_loader = get_loader(self)
+        self.TEXT, self.vocab_size, self.word_embeddings, self.train_loader, self.test_loader = get_loader(self)
         
         # initialize network
         self.model = get_net(self)
@@ -133,6 +132,16 @@ class Experiment:
             
             # forward pass
             est = self.model(input)
+            
+            #print("est")
+            #print()
+            #print(est)
+            #print()
+            #print("target")
+            #print(target)
+            
+            # Threshold the labels with 0.5
+            #target = (target > 0.5).float()
             
             # compute loss
             loss = self.criterion(est, target)

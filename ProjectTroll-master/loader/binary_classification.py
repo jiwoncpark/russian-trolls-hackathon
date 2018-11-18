@@ -5,6 +5,9 @@ from torchtext.data import Field, TabularDataset, Iterator, Pipeline
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
+        # dl is iterator
+        # x_var is content
+        # y_vars is list of label(s)
         self.dl, self.x_var, self.y_vars = dl, x_var, y_vars
     
     def __iter__(self):
@@ -12,11 +15,12 @@ class BatchWrapper:
             x = getattr(batch, self.x_var)
             y = torch.cat([getattr(batch, feat).unsqueeze(1) for feat in self.y_vars], dim=1).float()
             yield (x, y)
+            #pass
   
     def __len__(self):
         return len(self.dl)
     
-def basic(obj):
+def binary_classification(obj):
     tokenize = lambda x: x.split()
     TEXT = Field(sequential=True,
                  tokenize=tokenize,
@@ -31,11 +35,10 @@ def basic(obj):
     
     fields = [('id', None),
               ('content', TEXT),
-              ('Trump', LABEL),
-              ('Clinton', LABEL)]
+              ('trump_percentage', LABEL),]
     
-    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
-    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
+    train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_trump_percentage.csv'
+    test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_trump_percentage.csv'
     
     train_dataset = TabularDataset(path=obj.data_path+'/'+train_csv,
                                    format='csv',
@@ -61,12 +64,11 @@ def basic(obj):
             sort_within_batch=True,
             repeat=False)
     
-    train_iter_ = BatchWrapper(train_iter, 'content', ['Trump','Clinton'])
-    test_iter_ = BatchWrapper(test_iter, 'content', ['Trump','Clinton'])
+    train_iter_ = BatchWrapper(train_iter, 'content', ['trump_percentage'])
+    test_iter_ = BatchWrapper(test_iter, 'content', ['trump_percentage'])
     
     return TEXT, vocab_size, word_embeddings, train_iter_, test_iter_
-
-
+  
 if __name__== "__main__":
 
     tokenize = lambda x: x.split()
@@ -83,11 +85,12 @@ if __name__== "__main__":
 
     fields = [('id', None),
               ('content', TEXT),
-              ('Trump', LABEL),
-              ('Clinton', LABEL)]
-    
-    train_csv = 'twitter_pollster_7_days_train.csv'
-    test_csv = 'twitter_pollster_7_days_test.csv'
+              ('Trump', None),
+              ('Clinton', None),
+              ('trump_percentage', LABEL),]
+
+    train_csv = 'twitter_pollster_7_days_train_trump_percentage.csv'
+    test_csv = 'twitter_pollster_7_days_test_trump_percentage.csv'
 
     train_dataset = TabularDataset(path='mydata/'+train_csv,
                                    format='csv',
@@ -99,8 +102,8 @@ if __name__== "__main__":
                                   skip_header=True,
                                   fields=fields)
 
-    TEXT.build_vocab(train_dataset, vectors=GloVe(name='6B',
-                                                  dim=300))
+    TEXT.build_vocab(train_dataset, vectors=GloVe(name='twitter.27B',
+                                                  dim=200))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())
@@ -112,10 +115,12 @@ if __name__== "__main__":
             device=torch.device('cuda:0'),
             sort_within_batch=True,
             repeat=False)
-    
-    train_iter_ = BatchWrapper(train_iter, 'content', ['Trump','Clinton'])
-    test_iter_ = BatchWrapper(test_iter, 'content', ['Trump','Clinton'])
 
+    train_iter_ = BatchWrapper(train_iter, 'content', ['trump_percentage'])
+    test_iter_ = BatchWrapper(test_iter, 'content', ['trump_percentage'])
+
+    print(print(next(iter(train_iter_))))
+          
     for iter, batch in enumerate(train_iter_, 1):
         if iter==1:
             print(iter, batch)
