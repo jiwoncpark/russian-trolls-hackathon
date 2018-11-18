@@ -12,14 +12,13 @@ election_date = pd.to_datetime('2016-11-08')
 
 # load both datasets
 print('loading data')
-twitter = pd.read_csv(os.path.join(troll_root, 'mydata', 'twitter.csv'))
+twitter = pd.read_csv(os.path.join(troll_root, 'mydata', 'twitter_metadata.csv'))
 pollster = pd.read_csv(os.path.join(troll_root, 'mydata', 'pollster_left_mid_right.csv'))
 
 # format dates
 print('formating dates')
 twitter['publish_date'] = pd.to_datetime(twitter['publish_date'])
 pollster['start_date'] = pd.to_datetime(pollster['start_date'])
-
 
 pollster.sort_values(by=['start_date'], inplace=True)
 
@@ -44,7 +43,6 @@ twitter = twitter.loc[twitter['poll_idx'] != None]
 # twitter = twitter.join(pollster,on='poll_idx')
 # twitter.sort_values(by=['poll_idx'], inplace=True)
 # twitter.to_csv(os.path.join(troll_root, 'mydata', 'twitter_pollster.csv'))
-
  
 # aggregate the tweets of each poll
 print('aggregating tweets belonging to the same poll')
@@ -62,19 +60,12 @@ for j in range(len(pollster)):
         pollster.loc[j,'avg_right'] = np.mean(tweets['account_category'] == 'RightTroll')
         pollster.loc[j,'avg_left'] = np.mean(tweets['account_category'] == 'LeftTroll')
         pollster.loc[j,'avg_news'] = np.mean(tweets['account_category'] == 'NewsFeed')
-        pollster.loc[j,'time'] = (election_date - pollster.loc[j,'start_date'])
+        pollster.loc[j,'time'] = (election_date - pollster.loc[j,'start_date']).days
 
-pollster['avg_followers'] = pollster['avg_followers'].astype(np.float32)
-pollster['avg_following'] = pollster['avg_following'].astype(np.float32)
-pollster['avg_right'] = pollster['avg_right'].astype(np.float32)
-pollster['avg_left'] = pollster['avg_left'].astype(np.float32)
-pollster['avg_news'] = pollster['avg_news'].astype(np.float32)
-#pollster['time'] = pollster['time'].astype(np.float32)
-pollster['left'] = pollster['left'].astype(np.float32)
-pollster['mid'] = pollster['mid'].astype(np.float32)
-pollster['right'] = pollster['right'].astype(np.float32)
-
-
+print(pollster.columns)
+        
+for col in ['avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'left', 'mid', 'right']:
+    pollster[col] = pollster[col].astype(np.float32)
         
 # remove polls with no tweets
 pollster = pollster.loc[polls_with_tweets]

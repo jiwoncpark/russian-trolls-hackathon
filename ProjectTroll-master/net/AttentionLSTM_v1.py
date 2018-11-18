@@ -73,23 +73,16 @@ class AttentionLSTM(nn.Module):
         super(AttentionLSTM, self).__init__()
         self.encoder = Encoder(obj)
         self.attention = Attention(obj)
-        self.metafc = nn.Linear(obj.meta_dim, obj.meta_hidden_size)
-        self.fc_1 = nn.Linear(obj.hidden_size + obj.meta_hidden_size, obj.total_hidden_size)
-        self.fc_final = nn.Linear(obj.total_hidden_size, obj.output_size)
-        self.sigmoid = nn.Sigmoid()
+        self.classifier = nn.Linear(obj.hidden_size, obj.output_size)
     
-    def forward(self, input_text, input_meta):
+    def forward(self, input):
         #output, (final_hidden, state, final_cell_state) = self.encoder(input)
-        output, final_state = self.encoder(input_text)
+        output, final_state = self.encoder(input)
         output = output.permute(1, 0, 2)
         #hidden = final_cell_state[-1] # last layer of cell state
         # final hidden state
         #print(final_state[0].shape)
-        output_meta = self.metafc(input_meta)
-
         attn_output = self.attention(output, final_state[0])
-        after_fc_1 = self.fc_1(torch.cat((attn_output, output_meta), dim=1))
-        after_fc_final = self.fc_final(after_fc_1)
-
-        return self.sigmoid(after_fc_final)
+        logits = self.classifier(attn_output)
+        return logits
     
