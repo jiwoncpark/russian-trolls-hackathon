@@ -28,7 +28,7 @@ for net_idx in range(len(net_list)):
 
             loader_opts  = {'loader'                    : 'basic_meta_data', # 'binary_classification' for binary classification
                                                                                    # 'basic_meta_data' for taking in metadata and outputting 3-tuple
-                            'data_path'                 : '/home/jiwon.christine.park/CJRemoteRepo', #os.path.join(troll_root, 'mydata'),
+                            'data_path'                 : '/home/enguerrand.horel', #os.path.join(troll_root, 'mydata'),
                             'days'                      : 7,
                             'Glove_name'                : 'twitter.27B',
                             'embedding_dim'             : 200,
