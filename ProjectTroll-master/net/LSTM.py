@@ -8,6 +8,14 @@ class LSTM(nn.Module):
 
         self.obj = obj
         
+        self.relu = nn.ReLU()
+        
+        self.bn_meta = nn.BatchNorm1d(obj.meta_dim)
+        
+        self.bn_concat = nn.BatchNorm1d(obj.hidden_size + obj.meta_hidden_size)
+        
+        self.bn_fc = nn.BatchNorm1d(obj.total_hidden_size)
+        
         self.word_embeddings = nn.Embedding(obj.vocab_size,
                                             obj.embedding_dim)
         self.word_embeddings.weight = nn.Parameter(obj.word_embeddings, requires_grad=False)
@@ -39,12 +47,18 @@ class LSTM(nn.Module):
 
         output, (final_hidden_state, final_cell_state) = self.lstm(input_text, (h_0, c_0))
         
-        output_meta = self.metafc(input_meta)
+        bn_input_meta = self.bn_meta(input_meta)
+        output_meta = self.metafc(bn_input_meta)
+        output_meta = self.relu(output_meta)
 
         if self.obj.last_sigmoid:
-            after_fc_1 = self.fc_1(torch.cat((final_hidden_state[-1], output_meta), dim=1))
-            after_fc_final = self.fc_final(after_fc_1)
-            return self.sigmoid(after_fc_final)
+            concat = torch.cat((final_hidden_state[-1], output_meta), dim=1)
+            bn_concat = self.bn_concat(concat)
+            bn_concat = self.relu(bn_concat)
+            after_fc_1 = self.fc_1(bn_concat)
+            bn_after_fc_1 = self.bn_fc(after_fc_1)
+            bn_after_fc_1 = self.relu(bn_after_fc_1)
+            after_fc_final = self.fc_final(bn_after_fc_1)
+            return after_fc_final #self.sigmoid(after_fc_final)
         else:
             return self.label(final_hidden_state[-1])
-

@@ -45,7 +45,7 @@ for net_idx in range(len(net_list)):
                             'output_size'               : 3,
                             }
 
-            train_opts   = {'crit'                      : 'BCELoss', #'MSELoss', #'BCELoss' for binary classification
+            train_opts   = {'crit'                      : 'MSELoss', #'MSELoss', #'BCELoss' for binary classification
                             'net'                       : net_list[net_idx],
                             'optim'                     : 'Adam',
                             'weight_decay'              : wd_list[wd_idx],
@@ -54,7 +54,7 @@ for net_idx in range(len(net_list)):
                             'lr'                        : lr_list[lr_idx],
                             'milestones_perc'           : [1/3,2/3],
                             'gamma'                     : 0.1,
-                            'train_batch_size'          : 2**5,
+                            'train_batch_size'          : 2**4,
                             'test_batch_size'           : 2**5,
                             'device'                    : get_device(),
                             'seed'                      : 0,
@@ -70,7 +70,12 @@ for net_idx in range(len(net_list)):
 
             # these meters will be displayed to the console and saved into a csv
             stats_meter = {'loss': lambda variables: float(variables['loss'].item()),
-                           }
+                           'baseline1': lambda variables: float(variables['baseline1'].item()),
+                           'baseline2': lambda variables: float(variables['baseline2'].item()),
+                           'baseline3': lambda variables: float(variables['baseline3'].item()),
+                            'loss1': lambda variables: float(variables['loss1'].item()),
+                           'loss2': lambda variables: float(variables['loss2'].item()),
+                           'loss3': lambda variables: float(variables['loss3'].item()),}
 
             # these meters will be displayed to the console but not saved into a csv
             stats_no_meter = {}
