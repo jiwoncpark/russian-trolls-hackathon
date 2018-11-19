@@ -7,7 +7,7 @@ import sys, os
 #sys.path.insert(0, troll_root)
 
 net_list        = [
-                   'GRU',
+                   'LSTM',
                    ]
 
 lr_list         = [
@@ -31,12 +31,12 @@ for net_idx in range(len(net_list)):
                             'data_path'                 : '/home/jiwon.christine.park/CJRemoteRepo', #os.path.join(troll_root, 'mydata'),
                             'days'                      : 7,
                             'Glove_name'                : 'twitter.27B',
-                            'embedding_dim'             : 200,
+                            'embedding_dim'             : 25,
                             'fix_length'                : None,
                             }
 
-            net_opts     = {'hidden_size'               : 256,
-                            'attention_size'            : 256,
+            net_opts     = {'hidden_size'               : 64, #256
+                            'attention_size'            : 64,
                             'meta_dim'                  : 9, # not configurable...
                             'meta_hidden_size'          : 16, # something less than 256 but comparable
                             'output_size'               : 3, #1 for binary classification
@@ -54,8 +54,8 @@ for net_idx in range(len(net_list)):
                             'lr'                        : lr_list[lr_idx],
                             'milestones_perc'           : [1/3,2/3],
                             'gamma'                     : 0.1,
-                            'train_batch_size'          : 2**7,
-                            'test_batch_size'           : 2**9,
+                            'train_batch_size'          : 2**5,
+                            'test_batch_size'           : 2**5,
                             'device'                    : get_device(),
                             'seed'                      : 0,
                             }

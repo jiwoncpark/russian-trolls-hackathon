@@ -153,7 +153,7 @@ class Experiment:
                 
                 ratios = []
                 for output_idx in range(3):
-                    ratio.append(three_baseline_losses[output_idx]/baseline_losses[output_idx])
+                    ratios.append(three_baseline_losses[output_idx]/three_losses[output_idx])
                     
                 # backward pass
                 if phase == 'train':
