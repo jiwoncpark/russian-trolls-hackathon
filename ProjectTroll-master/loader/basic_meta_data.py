@@ -3,6 +3,9 @@ import sys
 import csv
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset, Iterator, Pipeline
+import sys
+import csv
+csv.field_size_limit(sys.maxsize)
 
 csv.field_size_limit(sys.maxsize)
 
@@ -40,7 +43,12 @@ def basic_meta_data(obj):
                   batch_first=True,
                   use_vocab=False)
     
+<<<<<<< HEAD
     fields = [('content', TEXT),
+=======
+    fields = [#('id', None),
+              ('content', TEXT),
+>>>>>>> adefe3154bd7fbe6de1ac48a4d2be6f1f3dbef57
               ('avg_followers',VARIABLE),
               ('avg_following', VARIABLE),
               ('avg_left', VARIABLE),
@@ -54,9 +62,15 @@ def basic_meta_data(obj):
              ('mid', LABEL),
              ('right', LABEL)]
     
+<<<<<<< HEAD
     #train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
     train_csv = 'train1.csv'
     #test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test.csv'
+=======
+    #train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_small.csv'
+    #test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_small.csv'
+    train_csv = 'train1.csv'
+>>>>>>> adefe3154bd7fbe6de1ac48a4d2be6f1f3dbef57
     test_csv = 'test1.csv'
     
     train_dataset = TabularDataset(path=obj.data_path+'/'+train_csv,
@@ -70,7 +84,8 @@ def basic_meta_data(obj):
                                   fields=fields)
     
     TEXT.build_vocab(train_dataset, vectors=GloVe(name=obj.Glove_name,
-                                                  dim=obj.embedding_dim))
+                                                  dim=obj.embedding_dim, 
+                                                 cache='/home/jiwon.christine.park/CJRemoteRepo/glove'))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())
@@ -83,8 +98,13 @@ def basic_meta_data(obj):
             sort_within_batch=True,
             repeat=False)
     
+<<<<<<< HEAD
     train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right','time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
     test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right','time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+=======
+    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+>>>>>>> adefe3154bd7fbe6de1ac48a4d2be6f1f3dbef57
     
     return TEXT, vocab_size, word_embeddings, train_iter_, test_iter_
 
