@@ -45,7 +45,7 @@ for net_idx in range(len(net_list)):
                             'output_size'               : 3,
                             }
 
-            train_opts   = {'crit'                      : 'BCELoss', #'MSELoss', #'BCELoss' for binary classification
+            train_opts   = {'crit'                      : 'MSELoss', #'MSELoss', #'BCELoss' for binary classification
                             'net'                       : net_list[net_idx],
                             'optim'                     : 'Adam',
                             'weight_decay'              : wd_list[wd_idx],
