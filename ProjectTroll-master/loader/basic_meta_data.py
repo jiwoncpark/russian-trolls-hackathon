@@ -1,7 +1,10 @@
 import torch
-
+import sys
+import csv
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset, Iterator, Pipeline
+
+csv.field_size_limit(sys.maxsize)
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
@@ -37,20 +40,19 @@ def basic_meta_data(obj):
                   batch_first=True,
                   use_vocab=False)
     
-    fields = [('id', None),
-              ('content', TEXT),
+    fields = [('content', TEXT),
               ('avg_followers',VARIABLE),
               ('avg_following', VARIABLE),
-              ('avg_right', VARIABLE),
               ('avg_left', VARIABLE),
               ('avg_news', VARIABLE),
+              ('avg_right', VARIABLE),
               ('time', VARIABLE),
               ('baseline_pred_left', VARIABLE),
               ('baseline_pred_mid', VARIABLE),
               ('baseline_pred_right', VARIABLE),
               ('left', LABEL),
              ('mid', LABEL),
-             ('right', LABEL),]
+             ('right', LABEL)]
     
     #train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train.csv'
     train_csv = 'train1.csv'
@@ -81,8 +83,8 @@ def basic_meta_data(obj):
             sort_within_batch=True,
             repeat=False)
     
-    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
-    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right','time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right','time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
     
     return TEXT, vocab_size, word_embeddings, train_iter_, test_iter_
 
