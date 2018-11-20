@@ -1,10 +1,18 @@
 import torch
-
+import os
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset, Iterator, Pipeline
 import sys
 import csv
 csv.field_size_limit(sys.maxsize)
+
+# Deal with local/remote
+if 'Users' in os.getcwd():
+    # Specify your local mydata folder
+    path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+else:
+    # Specify your cloud mydata folder
+    path = '/home/zyflame104/GloVe'
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
@@ -72,7 +80,7 @@ def basic_meta_data(obj):
     
     TEXT.build_vocab(train_dataset, vectors=GloVe(name=obj.Glove_name,
                                                   dim=obj.embedding_dim, 
-                                                 cache='/home/enguerrand.horel/CJRemoteRepo/glove'))
+                                                 cache=path))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())

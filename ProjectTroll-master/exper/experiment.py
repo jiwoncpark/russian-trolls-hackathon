@@ -2,6 +2,7 @@ import sys
 import time
 import torch
 import random
+import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data.distributed
@@ -58,6 +59,11 @@ class Experiment:
     def run(self, stats_meter, stats_no_meter):
         
         self.set_seed()
+
+        best_total_loss = np.infty
+        best_loss_1 = np.infty
+        best_loss_2 = np.infty
+        best_loss_3 = np.infty
         
         for epoch in range(1, self.epochs + 1):
             
@@ -75,7 +81,7 @@ class Experiment:
                                        results)  
             
             # test epoch
-            results = self.run_epoch("test",
+            results, epoch_test_loss, epoch_test_loss1, epoch_test_loss2, epoch_test_loss3 = self.run_epoch("test",
                                        epoch,
                                        self.test_loader,
                                        stats_meter,
@@ -85,10 +91,31 @@ class Experiment:
             # save results to csv
             results.save()
             results.to_csv()
-            
-            # save model
-            save_check_point(self, self.model)
-            
+
+            # Update the checkpoint only when better test loss is found.
+            # We have 4 loss, (total, loss_1, loss_2, loss_3) and we save 4 models for each hyperparameter
+
+            if (best_total_loss > epoch_test_loss):
+                best_total_loss = epoch_test_loss
+                print('Better model for total loss is found and saved! The loss is {}'.format(best_total_loss))
+                save_check_point(self, self.model, 'total_loss')
+
+            if (best_loss_1 > epoch_test_loss1):
+                best_loss_1 = epoch_test_loss1
+                print('Better model for loss 1 is found and saved! The loss is {}'.format(best_loss_1))
+                save_check_point(self, self.model, 'loss_1')
+
+            if (best_loss_2 > epoch_test_loss2):
+                best_loss_2 = epoch_test_loss2
+                print('Better model for loss 2 is found and saved! The loss is {}'.format(best_loss_2))
+                save_check_point(self, self.model, 'loss_2')
+
+            if (best_loss_3 > epoch_test_loss3):
+                best_loss_3 = epoch_test_loss3
+                print('Better model for loss 3 is found and saved! The loss is {}'.format(best_loss_3))
+                save_check_point(self, self.model, 'loss_3')
+
+        return (best_total_loss, best_loss_1, best_loss_2, best_loss_3)
             
     def run_epoch(self,
                   phase,
@@ -123,100 +150,62 @@ class Experiment:
             data_time.update(time.time() - t)
     
             # batch input and target output
-            if self.loader == 'basic_meta_data':
-                input_text = batch[0] # tweets
-                input_meta = batch[1] # metadata
-                target = batch[2]
-                
-                # transfer data to gpu
-                input_text = input_text.to(self.device)
-                input_meta = input_meta.to(self.device)
-                target = target.to(self.device)
-                
-                torch.set_grad_enabled(phase == 'train')
-                
-                est = self.model(input_text=input_text, input_meta=input_meta)
-                #print(est[0,:])
-                loss = 0.0
-                three_losses = []
-                three_baseline_losses = []
-                baseline1 = 0.0
-                baseline2 = 0.0
-                baseline3 = 0.0
-                loss1 = 0.0
-                loss2 = 0.0
-                loss3 = 0.0
-                
-                for output_idx in range(3):
-                    flavor_est = est[:, output_idx]
-                    flavor_target = target[:, output_idx]
-                    flavor_loss = self.criterion(flavor_est, flavor_target)
-                    three_losses.append(flavor_loss)
-                    loss += flavor_loss/3.0
-                    # Baseline loss
-                    baseline_flavor_est = input_meta[:, output_idx + 5]
-                    baseline_flavor_loss = self.criterion(baseline_flavor_est, flavor_target)
-                    three_baseline_losses.append(baseline_flavor_loss)
-                
-                loss1 = self.criterion(est[:, 0], target[:, 0])
-                loss2 = self.criterion(est[:, 1], target[:, 1])
-                loss3 = self.criterion(est[:, 2], target[:, 2])
-                baseline1 = three_baseline_losses[0]
-                baseline2 = three_baseline_losses[1]
-                baseline3 = three_baseline_losses[2]
-                ratios = []
-                for output_idx in range(3):
-                    ratios.append(three_baseline_losses[output_idx]/three_losses[output_idx])
-                # backward pass
-                if phase == 'train':
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    self.optimizer.step()
-
-                # update meters (top1, top5, loss, etc.)
-                for name, func in stats_meter.items():
-                    meters[name].update(func(locals()), input_text.data.shape[0])
-
-                batch_time.update(time.time() - t)
-            else:
-                input   = batch[0] # tweets
-                target  = batch[1] # label
-                
-                # transfer data to gpu
-                input = input.to(self.device)
-                target = target.to(self.device)
-                
-                torch.set_grad_enabled(phase == 'train')
+            # if self.loader == 'basic_meta_data':
+            input_text = batch[0] # tweets
+            input_meta = batch[1] # metadata
+            target = batch[2]
             
-                # forward pass
-                est = self.model(input)
+            # transfer data to gpu
+            input_text = input_text.to(self.device)
+            input_meta = input_meta.to(self.device)
+            target = target.to(self.device)
             
-                #print("est")
-                #print()
-                #print(est)
-                #print()
-                #print("target")
-                #print(target)
-
-                # Threshold the labels with 0.5
-                #target = (target > 0.5).float()
-
-                # compute loss
-                loss = self.criterion(est, target)
+            torch.set_grad_enabled(phase == 'train')
             
-                # backward pass
-                if phase == 'train':
-                    self.optimizer.zero_grad()
-                    loss.backward()
-                    self.optimizer.step()
+            est = self.model(input_text=input_text, input_meta=input_meta)
 
-                # update meters (top1, top5, loss, etc.)
-                for name, func in stats_meter.items():
-                    meters[name].update(func(locals()), input.data.shape[0])
-
-                batch_time.update(time.time() - t)
+            loss = 0.0
+            three_losses = []
+            three_baseline_losses = []
+            baseline1 = 0.0
+            baseline2 = 0.0
+            baseline3 = 0.0
+            loss1 = 0.0
+            loss2 = 0.0
+            loss3 = 0.0
             
-            # print to console progress
+            for output_idx in range(3):
+                flavor_est = est[:, output_idx]
+                flavor_target = target[:, output_idx]
+                flavor_loss = self.criterion(flavor_est, flavor_target)
+                three_losses.append(flavor_loss)
+                loss += flavor_loss/3.0
+                # Baseline loss
+                baseline_flavor_est = input_meta[:, output_idx + 5]
+                baseline_flavor_loss = self.criterion(baseline_flavor_est, flavor_target)
+                three_baseline_losses.append(baseline_flavor_loss)
+            
+            loss1 = self.criterion(est[:, 0], target[:, 0])
+            loss2 = self.criterion(est[:, 1], target[:, 1])
+            loss3 = self.criterion(est[:, 2], target[:, 2])
+            baseline1 = three_baseline_losses[0]
+            baseline2 = three_baseline_losses[1]
+            baseline3 = three_baseline_losses[2]
+            ratios = []
+            for output_idx in range(3):
+                ratios.append(three_baseline_losses[output_idx]/three_losses[output_idx])
+            # backward pass
+            if phase == 'train':
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            # update meters (top1, top5, loss, etc.)
+            for name, func in stats_meter.items():
+                meters[name].update(func(locals()), input_text.data.shape[0])
+
+            batch_time.update(time.time() - t)
+
             output = '{}\t'                                                 \
                      'Network: {}\t'                                        \
                      'Epoch: [{}/{}][{}/{}]\t'                              \
@@ -266,9 +255,11 @@ class Experiment:
                 results.append(dict(self.__getstate__(), **stats))
             
             t = time.time()
-            
-        return results
-        
+          
+        if phase == 'test':
+          return results, stats['avg_loss'], stats['avg_loss1'], stats['avg_loss2'], stats['avg_loss3']
+        else:
+          return results
         
     def set_seed(self):
         # set the random seed of all devices for reproducibility
