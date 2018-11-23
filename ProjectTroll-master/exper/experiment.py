@@ -180,7 +180,7 @@ class Experiment:
                 three_losses.append(flavor_loss)
                 loss += flavor_loss/3.0
                 # Baseline loss
-                baseline_flavor_est = input_meta[:, output_idx + 5]
+                baseline_flavor_est = input_meta[:, output_idx + 6]
                 baseline_flavor_loss = self.criterion(baseline_flavor_est, flavor_target)
                 three_baseline_losses.append(baseline_flavor_loss)
             
