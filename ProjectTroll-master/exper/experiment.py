@@ -167,13 +167,7 @@ class Experiment:
             loss = 0.0
             three_losses = []
             three_baseline_losses = []
-            baseline1 = 0.0
-            baseline2 = 0.0
-            baseline3 = 0.0
-            loss1 = 0.0
-            loss2 = 0.0
-            loss3 = 0.0
-            
+                       
             for output_idx in range(3):
                 flavor_est = est[:, output_idx]
                 flavor_target = target[:, output_idx]
@@ -185,15 +179,10 @@ class Experiment:
                 baseline_flavor_loss = self.criterion(baseline_flavor_est, flavor_target)
                 three_baseline_losses.append(baseline_flavor_loss)
             
-            loss1 = self.criterion(est[:, 0], target[:, 0])
-            loss2 = self.criterion(est[:, 1], target[:, 1])
-            loss3 = self.criterion(est[:, 2], target[:, 2])
-            baseline1 = three_baseline_losses[0]
-            baseline2 = three_baseline_losses[1]
-            baseline3 = three_baseline_losses[2]
             ratios = []
             for output_idx in range(3):
                 ratios.append(three_baseline_losses[output_idx]/three_losses[output_idx])
+                
             # backward pass
             if phase == 'train':
                 self.optimizer.zero_grad()
