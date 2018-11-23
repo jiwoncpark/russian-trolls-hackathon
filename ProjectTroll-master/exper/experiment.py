@@ -56,67 +56,72 @@ class Experiment:
                                         gamma=self.gamma)
     
     
-    def run(self, stats_meter, stats_no_meter):
+    def run(self, stats_meter, stats_no_meter, test_run):
         
-        self.set_seed()
+        if not test_run:
+            # Normal case
+            self.set_seed()
 
-        best_total_loss = np.infty
-        best_loss_1 = np.infty
-        best_loss_2 = np.infty
-        best_loss_3 = np.infty
+            best_total_loss = np.infty
+            best_loss_1 = np.infty
+            best_loss_2 = np.infty
+            best_loss_3 = np.infty
+
+            for epoch in range(1, self.epochs + 1):
+
+                self.lr_scheduler.step()
+
+                # csv file for dumping results
+                results = Dump(self.training_results_path+'/'+self.train_dump_file)
+
+                # train epoch
+                results = self.run_epoch("train",
+                                           epoch,
+                                           self.train_loader,
+                                           stats_meter,
+                                           stats_no_meter,
+                                           results)  
+
+                # test epoch
+                results, epoch_test_loss, epoch_test_loss1, epoch_test_loss2, epoch_test_loss3 = self.run_epoch("test",
+                                           epoch,
+                                           self.test_loader,
+                                           stats_meter,
+                                           stats_no_meter,
+                                           results)
+
+                # save results to csv
+                results.save()
+                results.to_csv()
+
+                # Update the checkpoint only when better test loss is found.
+                # We have 4 loss, (total, loss_1, loss_2, loss_3) and we save 4 models for each hyperparameter
+
+                if (best_total_loss > epoch_test_loss):
+                    best_total_loss = epoch_test_loss
+                    print('Better model for total loss is found and saved! The loss is {}'.format(best_total_loss))
+                    save_check_point(self, self.model, 'total_loss')
+
+                if (best_loss_1 > epoch_test_loss1):
+                    best_loss_1 = epoch_test_loss1
+                    print('Better model for loss 1 is found and saved! The loss is {}'.format(best_loss_1))
+                    save_check_point(self, self.model, 'loss_1')
+
+                if (best_loss_2 > epoch_test_loss2):
+                    best_loss_2 = epoch_test_loss2
+                    print('Better model for loss 2 is found and saved! The loss is {}'.format(best_loss_2))
+                    save_check_point(self, self.model, 'loss_2')
+
+                if (best_loss_3 > epoch_test_loss3):
+                    best_loss_3 = epoch_test_loss3
+                    print('Better model for loss 3 is found and saved! The loss is {}'.format(best_loss_3))
+                    save_check_point(self, self.model, 'loss_3')
+
+            return (best_total_loss, best_loss_1, best_loss_2, best_loss_3)
+        else:
+            # Test run case
+            pass
         
-        for epoch in range(1, self.epochs + 1):
-            
-            self.lr_scheduler.step()
-            
-            # csv file for dumping results
-            results = Dump(self.training_results_path+'/'+self.train_dump_file)
-            
-            # train epoch
-            results = self.run_epoch("train",
-                                       epoch,
-                                       self.train_loader,
-                                       stats_meter,
-                                       stats_no_meter,
-                                       results)  
-            
-            # test epoch
-            results, epoch_test_loss, epoch_test_loss1, epoch_test_loss2, epoch_test_loss3 = self.run_epoch("test",
-                                       epoch,
-                                       self.test_loader,
-                                       stats_meter,
-                                       stats_no_meter,
-                                       results)
-            
-            # save results to csv
-            results.save()
-            results.to_csv()
-
-            # Update the checkpoint only when better test loss is found.
-            # We have 4 loss, (total, loss_1, loss_2, loss_3) and we save 4 models for each hyperparameter
-
-            if (best_total_loss > epoch_test_loss):
-                best_total_loss = epoch_test_loss
-                print('Better model for total loss is found and saved! The loss is {}'.format(best_total_loss))
-                save_check_point(self, self.model, 'total_loss')
-
-            if (best_loss_1 > epoch_test_loss1):
-                best_loss_1 = epoch_test_loss1
-                print('Better model for loss 1 is found and saved! The loss is {}'.format(best_loss_1))
-                save_check_point(self, self.model, 'loss_1')
-
-            if (best_loss_2 > epoch_test_loss2):
-                best_loss_2 = epoch_test_loss2
-                print('Better model for loss 2 is found and saved! The loss is {}'.format(best_loss_2))
-                save_check_point(self, self.model, 'loss_2')
-
-            if (best_loss_3 > epoch_test_loss3):
-                best_loss_3 = epoch_test_loss3
-                print('Better model for loss 3 is found and saved! The loss is {}'.format(best_loss_3))
-                save_check_point(self, self.model, 'loss_3')
-
-        return (best_total_loss, best_loss_1, best_loss_2, best_loss_3)
-            
     def run_epoch(self,
                   phase,
                   epoch,
