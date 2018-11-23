@@ -24,7 +24,7 @@ data_path = os.path.join(troll_root, 'mydata')
 # writer.writeheader()
 
 net_list        = [
-                   'GRU',
+                   'AttentionLSTM',
                    ]
 
 lr_list         = [
@@ -93,9 +93,9 @@ for net_idx in range(len(net_list)):
             # these meters will be displayed to the console but not saved into a csv
             stats_no_meter = {}
 
-            Experiment(opts).run(stats_meter, stats_no_meter)
+            Experiment(opts).run(stats_meter, stats_no_meter, False)
 
-            # best_result_one_hp = Experiment(opts).run(stats_meter, stats_no_meter)
+            #best_result_one_hp = Experiment(opts).run(stats_meter, stats_no_meter)
 
             # best_total_loss, best_loss_1, best_loss_2, best_loss_3 = best_result_one_hp
 
