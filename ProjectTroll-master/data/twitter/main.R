@@ -4,10 +4,10 @@ library(dplyr)
 library(tm) # Text Mining, https://www.rdocumentation.org/packages/tm/versions/0.7-5
 
 # all data
-#troll_tweets <- get_troll_data(data_dir = "mydata")
+troll_tweets <- get_troll_data(data_dir = "mydata")
 
 # small chunk of 2000 per file
-troll_tweets <- get_troll_data(data_dir = "mydata", nrows=2000)
+#troll_tweets <- get_troll_data(data_dir = "mydata", nrows=2000)
 
 # filter non enlgish tweets
 troll_tweets <- troll_tweets %>% dplyr::filter(language == "English")

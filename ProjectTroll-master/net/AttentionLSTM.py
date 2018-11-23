@@ -3,6 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import math
+import sys
+import csv
+csv.field_size_limit(sys.maxsize)
 
 class Encoder(nn.Module):
     """ Encoder containing the embedding plus LSTM layers.
@@ -64,6 +67,7 @@ class Attention(nn.Module):
         
         #values = values.transpose(0, 1) # [T, B, V] --> [B, T, V]
         #linear_combination = torch.bmm(energy, values).squeeze(1) # [B, 1, T] bmm [B, T, V] --> [B, 1, V] --> [B, V]
+        print(soft_attn_weights.shape)
         return new_hidden_state
 
 class AttentionLSTM(nn.Module):
@@ -77,6 +81,11 @@ class AttentionLSTM(nn.Module):
         self.fc_1 = nn.Linear(obj.hidden_size + obj.meta_hidden_size, obj.total_hidden_size)
         self.fc_final = nn.Linear(obj.total_hidden_size, obj.output_size)
         self.sigmoid = nn.Sigmoid()
+        
+        self.relu = nn.ReLU()
+        self.bn_meta = nn.BatchNorm1d(obj.meta_dim)
+        self.bn_concat = nn.BatchNorm1d(obj.hidden_size + obj.meta_hidden_size)
+        self.bn_fc = nn.BatchNorm1d(obj.total_hidden_size)
     
     def forward(self, input_text, input_meta):
         #output, (final_hidden, state, final_cell_state) = self.encoder(input)
@@ -85,11 +94,107 @@ class AttentionLSTM(nn.Module):
         #hidden = final_cell_state[-1] # last layer of cell state
         # final hidden state
         #print(final_state[0].shape)
-        output_meta = self.metafc(input_meta)
+        bn_input_meta = self.bn_meta(input_meta)
+        output_meta = self.metafc(bn_input_meta)
+        output_meta = self.relu(output_meta)
 
         attn_output = self.attention(output, final_state[0])
-        after_fc_1 = self.fc_1(torch.cat((attn_output, output_meta), dim=1))
-        after_fc_final = self.fc_final(after_fc_1)
+        concat = torch.cat((attn_output, output_meta), dim=1)
+        bn_concat = self.bn_concat(concat)
+        bn_concat = self.relu(bn_concat)
+        after_fc_1 = self.fc_1(bn_concat)
+        
+        bn_after_fc_1 = self.bn_fc(after_fc_1)
+        bn_after_fc_1 = self.relu(bn_after_fc_1)
+        after_fc_final = self.fc_final(bn_after_fc_1)
 
         return self.sigmoid(after_fc_final)
+
+if __name__=='__main__':
+    from torchtext.data import Field, TabularDataset, Iterator, Pipeline
+    import os, sys
+    import numpy as np
+    from torchtext.vocab import GloVe
     
+    class Options():
+        def __init__(self):
+            
+            
+            self.vocab_size = 20427
+            self.embedding_dim = 25
+            #self.word_embeddings = nn.Embedding(self.vocab_size, self.embedding_dim)
+            self.hidden_size = 64
+            self.meta_hidden_size = 16
+            self.meta_dim = 9
+            self.total_hidden_size = 8
+            self.device = 'cpu' #'cuda:0'
+            self.output_size = 3
+            self.Glove_name = 'twitter.27B'
+            self.fix_length = None
+            self.attention_size = 64
+            
+            troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
+            sys.path.insert(0, troll_root)
+            glove_path = os.path.join(troll_root, '.vector_cache')
+            self.data_path = os.path.join(troll_root, 'mydata')    
+            
+            tokenize = lambda x: x.split()
+            TEXT = Field(sequential=True,
+                         tokenize=tokenize,
+                         lower=True,
+                         batch_first=True,
+                         fix_length=self.fix_length)
+            
+            VARIABLE = Field(sequential=False,
+                  dtype=torch.float,
+                  batch_first=True,
+                  use_vocab=False)
+
+            LABEL = Field(sequential=False,
+                          dtype=torch.float,
+                          batch_first=True,
+                          use_vocab=False)
+            train_csv = 'train1.csv'
+            #test_csv = 'test1.csv'
+            
+            fields = [#('id', None),
+              ('content', TEXT),
+              ('avg_followers',VARIABLE),
+              ('avg_following', VARIABLE),
+              ('avg_left', VARIABLE),
+              ('avg_news', VARIABLE),
+              ('avg_right', VARIABLE),
+              ('time', VARIABLE),
+              ('baseline_pred_left', VARIABLE),
+              ('baseline_pred_mid', VARIABLE),
+              ('baseline_pred_right', VARIABLE),
+              ('left', LABEL),
+             ('mid', LABEL),
+             ('right', LABEL),
+             ('7', None),
+             ('8', None),
+             ('9', None)]
+            
+            train_dataset = TabularDataset(path=self.data_path + '/' + train_csv,
+                                           format='csv',
+                                           skip_header=True,
+                                           fields=fields)
+            TEXT.build_vocab(train_dataset, vectors=GloVe(name=self.Glove_name,
+                                                  dim=self.embedding_dim, 
+                                                 cache=glove_path))
+            #vocab_size = len(TEXT.vocab)
+            self.word_embeddings = TEXT.vocab.vectors
+    
+    obj = Options()
+    
+    model = AttentionLSTM(obj)
+    model.load_state_dict(torch.load('./results/net=AttentionLSTM-lr=0.01-total_loss.pth'))
+    model.eval()
+    input_meta_np = np.load('batch1.npy')
+    input_meta = torch.from_numpy(input_meta_np)
+    input_text_np = np.load('batch0.npy')
+    #print(input_text_np.shape)
+    input_text = torch.from_numpy(input_text_np) #torch.FloatTensor(input_text_np)
+    
+    est = model(input_text=input_text, input_meta=input_meta)
+    print("est:", est)

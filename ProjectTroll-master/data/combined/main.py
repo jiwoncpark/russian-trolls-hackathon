@@ -50,6 +50,7 @@ polls_with_tweets = []
 
 for j in range(len(pollster)):
     tweets = twitter[twitter['poll_idx'] == j]
+    print(len(tweets))
     
     if len(tweets) > 0:
         polls_with_tweets.append(j)

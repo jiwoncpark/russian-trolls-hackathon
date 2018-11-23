@@ -1,0 +1,28 @@
+from utils.device import get_device
+from exper.experiment import Experiment
+import sys, os
+if 'Users' in os.getcwd():
+    path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+else:
+    path = '/home/zyflame104/data'
+net_list        = [
+                   'LSTM',
+                   ]
+lr_list         = [
+                   1e-3, 1e-4
+                   ]
+wd_list         = [
+                   5e-4,
+                   ]
+    
+net_idx_fid = open('/tmp/net_idx.tmp','w')
+for net_idx in range(len(net_list)):net_idx_fid.write("%i\n" % net_idx);
+net_idx_fid.close()
+    
+lr_idx_fid = open('/tmp/lr_idx.tmp','w')
+for lr_idx in range(len(lr_list)):lr_idx_fid.write("%i\n" % lr_idx);
+lr_idx_fid.close()
+    
+wd_idx_fid = open('/tmp/wd_idx.tmp','w')
+for wd_idx in range(len(wd_list)):wd_idx_fid.write("%i\n" % wd_idx);
+wd_idx_fid.close()

@@ -1,10 +1,23 @@
 import torch
-
+import numpy as np
+import os
 from torchtext.vocab import GloVe
 from torchtext.data import Field, TabularDataset, Iterator, Pipeline
 import sys
 import csv
 csv.field_size_limit(sys.maxsize)
+
+# Deal with local/remote
+if 'Users' in os.getcwd():
+    # Specify your local mydata folder
+    glove_path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+else:
+    # Specify your cloud mydata folder
+    glove_path = '/home/zyflame104/GloVe'
+    
+troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
+sys.path.insert(0, troll_root)
+glove_path = os.path.join(troll_root, '.vector_cache')
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
@@ -53,7 +66,10 @@ def basic_meta_data(obj):
               ('baseline_pred_right', VARIABLE),
               ('left', LABEL),
              ('mid', LABEL),
-             ('right', LABEL),]
+             ('right', LABEL),
+             ('7', None),
+             ('8', None),
+             ('9', None)]
     
     #train_csv = 'twitter_pollster_'+str(obj.days)+'_days_train_small.csv'
     #test_csv = 'twitter_pollster_'+str(obj.days)+'_days_test_small.csv'
@@ -72,7 +88,7 @@ def basic_meta_data(obj):
     
     TEXT.build_vocab(train_dataset, vectors=GloVe(name=obj.Glove_name,
                                                   dim=obj.embedding_dim, 
-                                                 cache='/home/jiwon.christine.park/CJRemoteRepo/glove'))
+                                                 cache=glove_path))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())
@@ -89,7 +105,6 @@ def basic_meta_data(obj):
     test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
     
     return TEXT, vocab_size, word_embeddings, train_iter_, test_iter_
-
 
 if __name__== "__main__":
 
@@ -110,23 +125,26 @@ if __name__== "__main__":
                   batch_first=True,
                   use_vocab=False)
     
-    fields = [('id', None),
+    fields = [#('id', None),
               ('content', TEXT),
               ('avg_followers',VARIABLE),
               ('avg_following', VARIABLE),
-              ('avg_right', VARIABLE),
               ('avg_left', VARIABLE),
               ('avg_news', VARIABLE),
+              ('avg_right', VARIABLE),
               ('time', VARIABLE),
               ('baseline_pred_left', VARIABLE),
               ('baseline_pred_mid', VARIABLE),
               ('baseline_pred_right', VARIABLE),
               ('left', LABEL),
              ('mid', LABEL),
-             ('right', LABEL),]
+             ('right', LABEL),
+             ('7', None),
+             ('8', None),
+             ('9', None)]
     
-    train_csv = 'twitter_pollster_7_days_train_small.csv'
-    test_csv = 'twitter_pollster_7_days_test_small.csv'
+    train_csv = 'train1.csv'
+    test_csv = 'test1.csv'
 
     train_dataset = TabularDataset(path='mydata/'+train_csv,
                                    format='csv',
@@ -138,8 +156,8 @@ if __name__== "__main__":
                                   skip_header=True,
                                   fields=fields)
 
-    TEXT.build_vocab(train_dataset, vectors=GloVe(name='6B',
-                                                  dim=300))
+    TEXT.build_vocab(train_dataset, vectors=GloVe(name='twitter.27B',
+                                                  dim=25))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())
@@ -153,14 +171,18 @@ if __name__== "__main__":
             repeat=False)
     
     print(train_csv, test_csv)
-    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'],
-                               ['left', 'mid', 'right'])
-    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_right', 'avg_left', 'avg_news', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'],
-                              ['left', 'mid', 'right'])
+    train_iter_ = BatchWrapper(train_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
+    test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
 
+    batch0 = None
+    batch1 = None
+    batch2 = None
     for iter, batch in enumerate(train_iter_, 1):
         if iter==1:
-            print(iter, batch)
+            #print(iter, batch)
+            batch0 = batch[0]
+            batch1 = batch[1]
+            batch2 = batch[2]
             print("batch[0]: ", batch[0])
             print("batch[1]: ", batch[1]) # 6 metadata
             print("batch[2]: ", batch[2])
@@ -168,3 +190,7 @@ if __name__== "__main__":
             print("batch[1] size: ", batch[1].shape)
             print("batch[2] size: ", batch[2].shape)
         break
+    
+    np.save('batch0', batch0)
+    np.save('batch1', batch1)
+    np.save('batch2', batch2)

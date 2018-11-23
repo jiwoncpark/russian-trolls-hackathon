@@ -62,4 +62,3 @@ class LSTM(nn.Module):
             return after_fc_final #self.sigmoid(after_fc_final)
         else:
             return self.label(final_hidden_state[-1])
-

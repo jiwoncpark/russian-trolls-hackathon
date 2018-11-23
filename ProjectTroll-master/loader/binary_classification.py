@@ -89,8 +89,11 @@ if __name__== "__main__":
               ('Clinton', None),
               ('trump_percentage', LABEL),]
 
-    train_csv = 'twitter_pollster_7_days_train_trump_percentage.csv'
-    test_csv = 'twitter_pollster_7_days_test_trump_percentage.csv'
+    #train_csv = 'twitter_pollster_7_days_train_trump_percentage.csv'
+    #test_csv = 'twitter_pollster_7_days_test_trump_percentage.csv'
+    
+    train_csv = 'train1_thanksgiving.csv'
+    test_csv = 'train1_thanksgiving.csv'
 
     train_dataset = TabularDataset(path='mydata/'+train_csv,
                                    format='csv',
@@ -103,7 +106,7 @@ if __name__== "__main__":
                                   fields=fields)
 
     TEXT.build_vocab(train_dataset, vectors=GloVe(name='twitter.27B',
-                                                  dim=200))
+                                                  dim=25))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())
@@ -111,7 +114,7 @@ if __name__== "__main__":
     train_iter, test_iter = Iterator.splits(
             (train_dataset, test_dataset),
             sort_key=lambda x: len(x.content), 
-            batch_sizes=(7, 7),
+            batch_sizes=(3, 3),
             device=torch.device('cuda:0'),
             sort_within_batch=True,
             repeat=False)
@@ -123,9 +126,9 @@ if __name__== "__main__":
           
     for iter, batch in enumerate(train_iter_, 1):
         if iter==1:
-            print(iter, batch)
+            #print(iter, batch)
             print("batch[0]: ", batch[0])
-            print("batch[1]: ", batch[1])
+            #print("batch[1]: ", batch[1])
             print("batch[0] size: ", batch[0].shape)
             print("batch[1] size: ", batch[1].shape)
         break
