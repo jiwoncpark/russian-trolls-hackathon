@@ -8,11 +8,15 @@ import sys, os, csv
 
 if 'Users' in os.getcwd():
     # Specify your local mydata folder
-    path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+    data_path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
 else:
     # Specify your cloud mydata folder
-    path = '/home/zyflame104/data'
+    data_path = '/home/zyflame104/data'
 
+troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
+sys.path.insert(0, troll_root)
+data_path = os.path.join(troll_root, 'mydata')    
+    
 # Prepare a CSV file for each set of hyperparameters
 # csv_file = open('best_model_log.csv', mode='w')
 # fieldnames = ['net_list', 'lr_list', 'wd_list', 'best_total_loss', 'best_loss_1', 'best_loss_2', 'best_loss_3']
@@ -20,11 +24,11 @@ else:
 # writer.writeheader()
 
 net_list        = [
-                   'LSTM',
+                   'GRU',
                    ]
 
 lr_list         = [
-                   1e-3, 1e-4
+                   1e-2 #, 1e-4
                    ]
 
 wd_list         = [
@@ -37,7 +41,7 @@ for net_idx in range(len(net_list)):
 
             loader_opts  = {'loader'                    : 'basic_meta_data', # 'binary_classification' for binary classification
                                                                                    # 'basic_meta_data' for taking in metadata and outputting 3-tuple
-                            'data_path'                 : path, #os.path.join(troll_root, 'mydata'),
+                            'data_path'                 : data_path, #os.path.join(troll_root, 'mydata'),
                             'days'                      : 7,
                             'Glove_name'                : 'twitter.27B',
                             'embedding_dim'             : 25,
@@ -59,12 +63,12 @@ for net_idx in range(len(net_list)):
                             'optim'                     : 'Adam',
                             'weight_decay'              : wd_list[wd_idx],
                             'optim_kwargs'              : {},
-                            'epochs'                    : 5,
+                            'epochs'                    : 15,
                             'lr'                        : lr_list[lr_idx],
                             'milestones_perc'           : [1/3,2/3],
                             'gamma'                     : 0.1,
-                            'train_batch_size'          : 2**4,
-                            'test_batch_size'           : 2**5,
+                            'train_batch_size'          : 31,
+                            'test_batch_size'           : 31,
                             'device'                    : get_device(),
                             'seed'                      : 0,
                             }
@@ -82,7 +86,7 @@ for net_idx in range(len(net_list)):
                            'baseline1': lambda variables: float(variables['baseline1'].item()),
                            'baseline2': lambda variables: float(variables['baseline2'].item()),
                            'baseline3': lambda variables: float(variables['baseline3'].item()),
-                            'loss1': lambda variables: float(variables['loss1'].item()),
+                           'loss1': lambda variables: float(variables['loss1'].item()),
                            'loss2': lambda variables: float(variables['loss2'].item()),
                            'loss3': lambda variables: float(variables['loss3'].item()),}
 

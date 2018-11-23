@@ -9,10 +9,14 @@ csv.field_size_limit(sys.maxsize)
 # Deal with local/remote
 if 'Users' in os.getcwd():
     # Specify your local mydata folder
-    path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
+    glove_path = '/Users/zhangyue/Desktop/russian-trolls-hackathon/ProjectTroll-master/data/mydata'
 else:
     # Specify your cloud mydata folder
-    path = '/home/zyflame104/GloVe'
+    glove_path = '/home/zyflame104/GloVe'
+    
+troll_root = os.path.join(os.environ['REPOROOT'], 'ProjectTroll-master')
+sys.path.insert(0, troll_root)
+glove_path = os.path.join(troll_root, '.vector_cache')
 
 class BatchWrapper:
     def __init__(self, dl, x_var, y_vars):
@@ -80,7 +84,7 @@ def basic_meta_data(obj):
     
     TEXT.build_vocab(train_dataset, vectors=GloVe(name=obj.Glove_name,
                                                   dim=obj.embedding_dim, 
-                                                 cache=path))
+                                                 cache=glove_path))
     vocab_size = len(TEXT.vocab)
     word_embeddings = TEXT.vocab.vectors
     print ("vector size of text vocabulary: ", TEXT.vocab.vectors.size())
@@ -97,5 +101,6 @@ def basic_meta_data(obj):
     test_iter_ = BatchWrapper(test_iter, ['content', 'avg_followers', 'avg_following', 'avg_left', 'avg_news', 'avg_right', 'time', 'baseline_pred_left', 'baseline_pred_mid', 'baseline_pred_right'], ['left', 'mid', 'right'])
     
     return TEXT, vocab_size, word_embeddings, train_iter_, test_iter_
+
 
 

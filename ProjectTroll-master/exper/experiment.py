@@ -179,6 +179,13 @@ class Experiment:
                 baseline_flavor_loss = self.criterion(baseline_flavor_est, flavor_target)
                 three_baseline_losses.append(baseline_flavor_loss)
             
+            loss1 = three_losses[0]
+            loss2 = three_losses[1]
+            loss3 = three_losses[2]
+            baseline1 = three_baseline_losses[0]
+            baseline2 = three_baseline_losses[1]
+            baseline3 = three_baseline_losses[2]
+            
             ratios = []
             for output_idx in range(3):
                 ratios.append(three_baseline_losses[output_idx]/three_losses[output_idx])
@@ -246,9 +253,9 @@ class Experiment:
             t = time.time()
           
         if phase == 'test':
-          return results, stats['avg_loss'], stats['avg_loss1'], stats['avg_loss2'], stats['avg_loss3']
+            return results, stats['avg_loss'], stats['avg_loss1'], stats['avg_loss2'], stats['avg_loss3']
         else:
-          return results
+            return results
         
     def set_seed(self):
         # set the random seed of all devices for reproducibility
@@ -281,5 +288,3 @@ class Experiment:
                 del state[attr]
         
         return state
-        
-        
